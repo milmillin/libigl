@@ -234,9 +234,9 @@ if(LIBIGL_WITH_CGAL)
   endif()
 
   # If CGAL has been found, then build the libigl module
-  if(TARGET CGAL::CGAL AND TARGET CGAL::CGAL_Core)
+  if(TARGET CGAL::CGAL)
     compile_igl_module("cgal")
-    target_link_libraries(igl_cgal ${IGL_SCOPE} CGAL::CGAL CGAL::CGAL_Core)
+    target_link_libraries(igl_cgal ${IGL_SCOPE} CGAL::CGAL)
   else()
     message(FATAL_ERROR "Could not define CGAL::CGAL and CGAL::CGAL_Core.")
   endif()
