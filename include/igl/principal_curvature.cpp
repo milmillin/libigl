@@ -687,7 +687,9 @@ IGL_INLINE void CurvatureCalculator::computeCurvature()
 
     if (vv.size()<6)
     {
-      //std::cerr << "Could not compute curvature of radius " << scaledRadius << std::endl;
+      std::cerr << "Could not compute curvature of radius " << scaledRadius << std::endl;
+      curv[i] = std::vector<double>(2, 0);
+      curvDir[i] = std::vector<Eigen::Vector3d>(2, Eigen::Vector3d::Zero());
       continue;
     }
 
