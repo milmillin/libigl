@@ -15,7 +15,7 @@
 
 #include <math.h>
 
-#define IGL_RAY_TRI_EPSILON 0.000001
+#define IGL_RAY_TRI_EPSILON 0.000000001
 #define IGL_RAY_TRI_CROSS(dest,v1,v2) \
           dest[0]=v1[1]*v2[2]-v1[2]*v2[1]; \
           dest[1]=v1[2]*v2[0]-v1[0]*v2[2]; \
