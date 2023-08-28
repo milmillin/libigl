@@ -190,7 +190,6 @@ IGL_INLINE void igl::signed_distance(
         case SIGNED_DISTANCE_TYPE_DEFAULT:
         case SIGNED_DISTANCE_TYPE_WINDING_NUMBER:
         {
-          Scalar w = 0;
           if(dim == 3)
           {
             s = 1.-2.*hier3.winding_number(q3.transpose());
@@ -316,8 +315,7 @@ IGL_INLINE void igl::signed_distance_pseudonormal(
   N.resize(np,3);
   C.resize(np,3);
   typedef typename AABB<DerivedV,3>::RowVectorDIMS RowVector3S;
-# pragma omp parallel for if(np>1000)
-  for(std::ptrdiff_t p = 0;p<np;p++)
+  parallel_for(np,[&](const int p)
   {
     typename DerivedV::Scalar s,sqrd;
     RowVector3S n,c;
@@ -328,7 +326,7 @@ IGL_INLINE void igl::signed_distance_pseudonormal(
     I(p) = i;
     N.row(p) = n;
     C.row(p) = c;
-  }
+  },1000);
 }
 
 template <
@@ -509,7 +507,7 @@ IGL_INLINE typename DerivedV::Scalar igl::signed_distance_fast_winding_number(
     const igl::FastWindingNumberBVH & fwn_bvh)
   {
     typedef typename DerivedV::Scalar Scalar;
-    Scalar s,sqrd;
+    Scalar sqrd;
     Eigen::Matrix<Scalar,1,3> c;
     int i = -1;
     sqrd = tree.squared_distance(V,F,q,i,c);

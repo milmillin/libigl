@@ -20,26 +20,28 @@
 
 
 IGL_INLINE igl::opengl::ViewerData::ViewerData()
-: dirty(MeshGL::DIRTY_ALL),
-  show_faces        (~unsigned(0)),
-  show_lines        (~unsigned(0)),
+: 
+  dirty(MeshGL::DIRTY_ALL),
   face_based        (false),
   double_sided      (false),
   invert_normals    (false),
+  is_visible        (~unsigned(0)),
+  show_custom_labels(0),
+  show_face_labels  (0),
+  show_faces        (~unsigned(0)),
+  show_lines        (~unsigned(0)),
   show_overlay      (~unsigned(0)),
   show_overlay_depth(~unsigned(0)),
-  show_vertex_labels(0),
-  show_face_labels  (0),
-  show_custom_labels(0),
   show_texture      (false),
+  show_vertex_labels(0),
   use_matcap        (false),
   point_size(30),
   line_width(0.5f),
+  label_size(1),
   line_color(0,0,0,1),
   label_color(0,0,0.04,1),
   shininess(35.0f),
-  id(-1),
-  is_visible        (~unsigned(0))
+  id(-1)
 {
   clear();
 };
@@ -230,7 +232,6 @@ IGL_INLINE void igl::opengl::ViewerData::set_uv(const Eigen::MatrixXd& UV)
   using namespace std;
   if (UV.rows() == V.rows())
   {
-    set_face_based(false);
     V_uv = UV;
   }
   else
@@ -240,7 +241,6 @@ IGL_INLINE void igl::opengl::ViewerData::set_uv(const Eigen::MatrixXd& UV)
 
 IGL_INLINE void igl::opengl::ViewerData::set_uv(const Eigen::MatrixXd& UV_V, const Eigen::MatrixXi& UV_F)
 {
-  set_face_based(true);
   V_uv = UV_V.block(0,0,UV_V.rows(),2);
   F_uv = UV_F;
   dirty |= MeshGL::DIRTY_UV;
@@ -284,7 +284,17 @@ IGL_INLINE void igl::opengl::ViewerData::set_data(
     igl::colormap(cmap,Eigen::VectorXd::LinSpaced(num_steps,0,1).eval(),0,1,CM);
     set_colormap(CM);
   }
-  set_uv(((D.array()-caxis_min)/(caxis_max-caxis_min)).replicate(1,2));
+  Eigen::MatrixXd UV = ((D.array()-caxis_min)/(caxis_max-caxis_min)).replicate(1,2);
+  if(D.size() == V.rows())
+  {
+    set_uv(UV);
+  }else
+  {
+    assert(D.size() == F.rows());
+    Eigen::MatrixXi UV_F = 
+      Eigen::VectorXi::LinSpaced(F.rows(),0,F.rows()-1).replicate(1,3);
+    set_uv(UV,UV_F);
+  }
 }
 
 IGL_INLINE void igl::opengl::ViewerData::set_data(const Eigen::VectorXd & D, igl::ColorMapType cmap, int num_steps)
@@ -364,7 +374,13 @@ IGL_INLINE void igl::opengl::ViewerData::set_edges(
     {
       color<<C.row(e);
     }
-    lines.row(e)<< P.row(E(e,0)), P.row(E(e,1)), color;
+    if(P.cols() == 2)
+    {
+      lines.row(e)<< P.row(E(e,0)),0, P.row(E(e,1)),0, color;
+    }else
+    {
+      lines.row(e)<< P.row(E(e,0)), P.row(E(e,1)), color;
+    }
   }
   dirty |= MeshGL::DIRTY_OVERLAY_LINES;
 }
@@ -599,7 +615,6 @@ IGL_INLINE void igl::opengl::ViewerData::grid_texture()
 
 // Populate VBOs of a particular label stype (Vert, Face, Custom)
 IGL_INLINE void igl::opengl::ViewerData::update_labels(
-  igl::opengl::MeshGL& meshgl,
   igl::opengl::MeshGL::TextGL& GL_labels,
   const Eigen::MatrixXd& positions,
   const std::vector<std::string>& strings
@@ -872,7 +887,6 @@ IGL_INLINE void igl::opengl::ViewerData::updateGL(
       }
     }
     update_labels(
-      meshgl,
       meshgl.face_labels,
       face_labels_positions,
       face_labels_strings
@@ -893,7 +907,6 @@ IGL_INLINE void igl::opengl::ViewerData::updateGL(
       }
     }
     update_labels(
-      meshgl,
       meshgl.vertex_labels,
       vertex_labels_positions,
       vertex_labels_strings
@@ -903,7 +916,6 @@ IGL_INLINE void igl::opengl::ViewerData::updateGL(
   if (meshgl.dirty & MeshGL::DIRTY_CUSTOM_LABELS)
   {
     update_labels(
-      meshgl,
       meshgl.custom_labels,
       labels_positions,
       labels_strings

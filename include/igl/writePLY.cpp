@@ -141,13 +141,13 @@ bool writePLY(
 
     if(ED.cols()>0)
     {
-        assert(ED.rows()==F.rows());
+        assert(ED.rows()==E.rows());
         assert(ED.cols() == EDheader.size());
 
         _ed.resize(ED.size());
         Eigen::Map<Eigen::Matrix<EDScalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor > >( &_ed[0], ED.rows(), ED.cols() ) = ED;
 
-        file.add_properties_to_element("face", FDheader,
+        file.add_properties_to_element("edge", EDheader,
             tynyply_type<EDScalar>(), ED.rows(), reinterpret_cast<uint8_t*>( &_ed[0] ), tinyply::Type::INVALID, 0);
     }
 
