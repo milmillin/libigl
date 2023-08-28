@@ -14,10 +14,9 @@
 
 namespace igl
 {
-  // Space partitioning tree for computing winding number hierarchically.
-  //
-  // Templates:
-  //   Point  type for points in space, e.g. Eigen::Vector3d
+  /// Space partitioning tree for computing winding number hierarchically.
+  ///
+  /// @tparam Point  type for points in space, e.g. Eigen::Vector3d
   template <
     typename Point,
     typename DerivedV, 
@@ -143,8 +142,8 @@ namespace igl
 #include "triangle_fan.h"
 #include "exterior_edges.h"
 
-#include <igl/PI.h>
-#include <igl/remove_duplicate_vertices.h>
+#include "PI.h"
+#include "remove_duplicate_vertices.h"
 
 #include <iostream>
 #include <limits>
@@ -215,7 +214,7 @@ inline igl::WindingNumberTree<Point,DerivedV,DerivedF>::WindingNumberTree(
 }
 
 template <typename Point, typename DerivedV, typename DerivedF>
-inline igl::WindingNumberTree<Point,DerivedV,DerivedF>::~WindingNumberTree()
+inline igl::WindingNumberTree<Point,DerivedV,DerivedF>::~WindingNumberTree<Point,DerivedV,DerivedF>()
 {
   delete_children();
 }

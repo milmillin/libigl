@@ -6,6 +6,7 @@
 // v. 2.0. If a copy of the MPL was not distributed with this file, You can 
 // obtain one at http://mozilla.org/MPL/2.0/.
 #include "arap_dof.h"
+#include "IGL_ASSERT.h"
 
 #include "cotmatrix.h"
 #include "massmatrix.h"
@@ -25,7 +26,6 @@
 #include "verbose.h"
 #include "print_ijv.h"
 
-#include "get_seconds_hires.h"
 //#include "MKLEigenInterface.h"
 #include "kkt_inverse.h"
 #include "get_seconds.h"
@@ -548,12 +548,12 @@ IGL_INLINE bool igl::arap_dof_recomputation(
   MatrixXd A_eqfull(A_eq);
   MatrixXd M_Solve;
 
-  double timer0_start = get_seconds_hires();
+  double timer0_start = get_seconds();
   bool use_lu = data.effective_dim != 2;
   //use_lu = false;
   //printf("use_lu: %s\n",(use_lu?"TRUE":"FALSE"));
   kkt_inverse(Qfull, A_eqfull, use_lu,M_Solve);
-  double timer0_end = get_seconds_hires();
+  double timer0_end = get_seconds();
   verbose("Bob timing: %.20f\n", (timer0_end - timer0_start)*1000.0);
 
   // Precompute full solve matrix:
@@ -616,14 +616,14 @@ IGL_INLINE bool igl::arap_dof_update(
   using namespace Eigen;
   typedef Matrix<SSCALAR, Dynamic, Dynamic> MatrixXS;
 #ifdef ARAP_GLOBAL_TIMING
-  double timer_start = get_seconds_hires();
+  double timer_start = get_seconds();
 #endif
 
   // number of dimensions
-  assert((int)data.CSM_M.size() == data.dim);
-  assert((int)L0.size() == (data.m)*data.dim*(data.dim+1));
-  assert(max_iters >= 0);
-  assert(tol >= 0);
+  IGL_ASSERT((int)data.CSM_M.size() == data.dim);
+  IGL_ASSERT((int)L0.size() == (data.m)*data.dim*(data.dim+1));
+  IGL_ASSERT(max_iters >= 0);
+  IGL_ASSERT(tol >= 0);
 
   // timing variables
   double 
@@ -686,7 +686,7 @@ IGL_INLINE bool igl::arap_dof_update(
   MatrixXS L_part1(data.dim * (data.dim + 1) * data.m, 1);
 
 #ifdef ARAP_GLOBAL_TIMING
-    double timer_prepFinished = get_seconds_hires();
+    double timer_prepFinished = get_seconds();
 #endif
 
 #ifdef IGL_ARAP_DOF_FIXED_ITERATIONS_COUNT
@@ -697,7 +697,7 @@ IGL_INLINE bool igl::arap_dof_update(
   {  
     if(data.print_timings)
     {
-      sec_start = get_seconds_hires();
+      sec_start = get_seconds();
     }
 
 #ifndef IGL_ARAP_DOF_FIXED_ITERATIONS_COUNT
@@ -722,7 +722,7 @@ IGL_INLINE bool igl::arap_dof_update(
     
     if(data.print_timings)
     {
-      sec_covGather = get_seconds_hires();
+      sec_covGather = get_seconds();
     }
 
 #ifdef EXTREME_VERBOSE
@@ -747,7 +747,7 @@ IGL_INLINE bool igl::arap_dof_update(
 
     if(data.print_timings)
     {
-      sec_fitRotations = get_seconds_hires();
+      sec_fitRotations = get_seconds();
     }
   
     ///////////////////////////////////////////////////////////////////////////
@@ -766,7 +766,7 @@ IGL_INLINE bool igl::arap_dof_update(
     
     if(data.print_timings)
     {
-      sec_prepMult = get_seconds_hires();
+      sec_prepMult = get_seconds();
     }  
     
     L_part1xyz = data.CSolveBlock1 * Rxyz;
@@ -824,7 +824,7 @@ IGL_INLINE bool igl::arap_dof_update(
 
     if(data.print_timings)
     {
-      sec_solve = get_seconds_hires();
+      sec_solve = get_seconds();
     }
 
 #ifndef IGL_ARAP_DOF_FIXED_ITERATIONS_COUNT
@@ -835,7 +835,7 @@ IGL_INLINE bool igl::arap_dof_update(
 
     if(data.print_timings)
     {
-      sec_end = get_seconds_hires();
+      sec_end = get_seconds();
 #ifndef WIN32
       // trick to get sec_* variables to compile without warning on mac
       if(false)
@@ -861,7 +861,7 @@ IGL_INLINE bool igl::arap_dof_update(
   assert(L.cols() == 1);
 
 #ifdef ARAP_GLOBAL_TIMING
-  double timer_finito = get_seconds_hires();
+  double timer_finito = get_seconds();
   printf(
     "ARAP preparation = %f, "
     "all %i iterations = %f [ms]\n", 
